@@ -1,0 +1,14 @@
+[
+  {"description": "The full automated test suite passes (unit, integration, TUI, provider-mock, agent-loop, browser, preview, self-audit)", "verify": "tests"},
+  {"description": "Lint is clean (ruff)", "verify": "cmd:{py} -m ruff check src scripts tests"},
+  {"description": "Type check is clean (mypy)", "verify": "cmd:{py} -m mypy"},
+  {"description": "The package builds and imports its declared entry point", "verify": "cmd:{py} -c \"import genius_dev.cli as c; c.main\""},
+  {"description": "The offline demo (fix scenario) completes with every requirement PASS", "verify": "cmd:{py} -m genius_dev.cli demo --fast"},
+  {"description": "The debug demo (wrong first fix -> diagnosis -> repair) completes", "verify": "cmd:{py} -m genius_dev.cli demo --scenario debug --fast"},
+  {"description": "Every provider adapter passes the mocked success/stream/tool/error/timeout/context matrix and status semantics", "verify": "cmd:{py} -m pytest -q tests/test_providers.py tests/test_providers_more.py"},
+  {"description": "Model routing, fallback, budget and privacy behave as specified", "verify": "cmd:{py} -m pytest -q tests/test_router.py"},
+  {"description": "Checkpoints, restore/undo, project memory, requirements and crash recovery work", "verify": "cmd:{py} -m pytest -q tests/test_state.py tests/test_agent.py"},
+  {"description": "Offline semantic search finds the right code and feeds context selection", "verify": "cmd:{py} -m pytest -q tests/test_search.py"},
+  {"description": "Plugins load, isolate failures and contribute tools/doctor/preview; previews report honestly", "verify": "cmd:{py} -m pytest -q tests/test_plugins_preview.py"},
+  {"description": "The repository audits itself clean (commands, palette, views, intents, docs, no placeholders, no secrets)", "verify": "cmd:{py} -m pytest -q tests/test_self_audit.py"}
+]
