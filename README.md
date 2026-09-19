@@ -23,6 +23,7 @@ playwright install chromium                  # only for browser testing / visual
 genius --install-completion                  # zsh/bash/fish completion
 ./dev.sh                                     # development: venv + editable install (+ dev, browser extras) then launches genius
 ```
+**Standalone macOS binary (Apple silicon, no Python needed for genius itself):** `./scripts/build_standalone.sh` builds `dist/standalone/genius/genius`; `packaging/homebrew/genius-dev.rb` is the Homebrew formula (publish steps inside).
 Requires Python ≥ 3.11 (developed on 3.13) and `git` (checkpoints). macOS is the supported platform; Windows is **not yet verified**.
 
 ## Add your first API key later

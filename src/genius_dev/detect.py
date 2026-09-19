@@ -88,11 +88,19 @@ def _read_json(p: Path) -> dict:
         return {}
 
 
+def python_executable() -> str:
+    """An interpreter for running *project* commands. In the standalone binary sys.executable is genius itself, so use the system Python."""
+    if getattr(sys, "frozen", False):
+        import shutil
+        return shutil.which("python3") or "/usr/bin/python3"
+    return sys.executable
+
+
 def project_python(root: Path) -> str:
     for c in (root / ".venv/bin/python", root / "venv/bin/python"):
         if c.exists():
             return str(c)
-    return sys.executable
+    return python_executable()
 
 
 @builtin("python")
@@ -264,7 +272,7 @@ def _services(root: Path, i: ProjectInfo) -> None:
         i.add("services", "Cypress")
     if any(root.glob("*.html")) and i.kind == "unknown":
         port = _stable_port(root)
-        i.kind, i.dev_cmd, i.dev_port = "web", f"{shlex.quote(sys.executable)} -m http.server {port}", port
+        i.kind, i.dev_cmd, i.dev_port = "web", f"{shlex.quote(python_executable())} -m http.server {port}", port
         i.add("languages", "html")
 
 

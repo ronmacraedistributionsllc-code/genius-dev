@@ -23,6 +23,11 @@ from typing import Any, Awaitable, Callable
 API_VERSION = 1
 
 
+def python_executable() -> str:
+    from .detect import python_executable as _pe
+    return _pe()
+
+
 @dataclass
 class Check:
     name: str
@@ -113,8 +118,8 @@ class PythonPlugin(Plugin):
         BUILTIN_DETECTORS["python"](root, info)
 
     async def doctor(self, project):
-        out = [Check("Python", "ok", f"{sys.version.split()[0]} ({sys.executable})")]
-        r = await _run(f"{shlex.quote(sys.executable)} -m pip --version", os.getcwd())
+        out = [Check("Python", "ok", f"{sys.version.split()[0]} ({python_executable()})")]
+        r = await _run(f"{shlex.quote(python_executable())} -m pip --version", os.getcwd())
         no_pip = "skip" if shutil.which("uv") else "warn"          # uv-managed venvs deliberately ship without pip
         out.append(Check("pip", "ok" if r.ok else no_pip, (r.output.splitlines() or [""])[0][:60] if r.ok else "not in this interpreter" + (" (uv manages packages)" if no_pip == "skip" else "")))
         if project and "python" in project.info.languages and project.info.python:
@@ -125,7 +130,7 @@ class PythonPlugin(Plugin):
     def tools(self):
         async def python_env(tb) -> Any:
             from .tools import ToolResult
-            r = await tb._sh(f"{shlex.quote(tb.p.info.python or sys.executable)} -m pip list --format=freeze")
+            r = await tb._sh(f"{shlex.quote(tb.p.info.python or python_executable())} -m pip list --format=freeze")
             return ToolResult(r.ok, f"{len(r.stdout.splitlines())} packages", r.stdout[:3000])
         return [PluginTool("python_env", "List installed Python packages for the project interpreter.", {}, python_env, "ENV")]
 
