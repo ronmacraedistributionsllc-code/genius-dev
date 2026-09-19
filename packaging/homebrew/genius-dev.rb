@@ -11,7 +11,7 @@ class GeniusDev < Formula
   depends_on :macos
 
   def install
-    libexec.install Dir["genius/*"]
+    libexec.install Dir["*"]
     bin.install_symlink libexec/"genius"
   end
 
