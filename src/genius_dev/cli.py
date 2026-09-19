@@ -1090,6 +1090,20 @@ def plugins(path: str = PathOpt, json_out: bool = JsonOpt) -> None:
     _emit({"plugins": rows, "errors": reg.errors}, json_out, render)
 
 
+@app.command("browser-install")
+def browser_install() -> None:
+    """Download Chromium for browser testing / visual QA (works from the standalone binary too)."""
+    import subprocess
+    from .browser import configure_browser_path, playwright_installed
+    configure_browser_path()
+    if not playwright_installed():
+        err.print(Text("✕ Playwright is not installed: pip install 'genius-dev[browser]'", style=T.FAIL)); raise typer.Exit(1)
+    from playwright._impl._driver import compute_driver_executable, get_driver_env
+    node, cli_js = compute_driver_executable()
+    con.print(Text("  Downloading Chromium (~150 MB) …", style=T.DIM))
+    raise typer.Exit(subprocess.run([str(node), str(cli_js), "install", "chromium"], env=get_driver_env()).returncode)
+
+
 @app.command("help")
 def help_(ctx: typer.Context) -> None:
     """Show help."""

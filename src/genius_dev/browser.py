@@ -11,6 +11,23 @@ from typing import Any
 VIEWPORTS = {"desktop": (1280, 800), "tablet": (768, 1024), "mobile": (390, 844)}
 
 
+def configure_browser_path() -> None:
+    """The standalone binary bundles Playwright's driver but not a browser: use the shared per-user browser cache (same one `playwright install` fills)."""
+    import os
+    import sys
+    if getattr(sys, "frozen", False) and "PLAYWRIGHT_BROWSERS_PATH" not in os.environ:
+        os.environ["PLAYWRIGHT_BROWSERS_PATH"] = str(Path.home() / "Library" / "Caches" / "ms-playwright")
+
+
+configure_browser_path()
+
+
+def install_browser_command() -> str:
+    """How to install Chromium in the current environment."""
+    import sys
+    return "genius browser-install" if getattr(sys, "frozen", False) else "playwright install chromium"
+
+
 def playwright_installed() -> bool:
     return importlib.util.find_spec("playwright") is not None
 
@@ -27,7 +44,7 @@ async def browser_ready() -> tuple[bool, str]:
         return True, "chromium ok"
     except Exception as e:  # noqa: BLE001
         msg = str(e).splitlines()[0][:120]
-        return False, f"chromium unavailable: {msg}  (run: playwright install chromium)"
+        return False, f"chromium unavailable: {msg}  (run: {install_browser_command()})"
 
 
 AUDIT_JS = r"""

@@ -146,3 +146,17 @@ async def test_tablet_viewport_and_empty_space_heuristic(tmp_path):
     finally:
         srv.shutdown()
     assert any(i["kind"] == "empty-space" for i in r.issues)
+
+
+def test_frozen_build_uses_shared_browser_cache(monkeypatch):
+    import sys
+    from genius_dev import browser
+    monkeypatch.delenv("PLAYWRIGHT_BROWSERS_PATH", raising=False)
+    monkeypatch.setattr(sys, "frozen", True, raising=False)
+    browser.configure_browser_path()
+    import os
+    assert os.environ["PLAYWRIGHT_BROWSERS_PATH"].endswith("Library/Caches/ms-playwright")
+    assert browser.install_browser_command() == "genius browser-install"
+    monkeypatch.setenv("PLAYWRIGHT_BROWSERS_PATH", "/custom")
+    browser.configure_browser_path()
+    assert os.environ["PLAYWRIGHT_BROWSERS_PATH"] == "/custom"                    # an explicit setting always wins

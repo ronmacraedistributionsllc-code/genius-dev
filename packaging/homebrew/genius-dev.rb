@@ -5,7 +5,7 @@ class GeniusDev < Formula
   desc "Local-first autonomous AI software-engineering CLI/TUI"
   homepage "https://github.com/ronmacraedistributionsllc-code/genius-dev"
   url "https://github.com/ronmacraedistributionsllc-code/genius-dev/releases/download/v0.1.0/genius-dev-0.1.0-macos-arm64.tar.gz"
-  sha256 "af6ed54a3e54c270d426cbead472b6071397e96e6e1f2ac0fbea0069719952a1"
+  sha256 "fc397a4a6f1facbe246f97de700c965fb75b639aacf151a40785acfc52b4a72d"
   version "0.1.0"
   depends_on arch: :arm64
   depends_on :macos

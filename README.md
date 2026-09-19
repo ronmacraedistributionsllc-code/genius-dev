@@ -20,6 +20,7 @@ genius                       # open the TUI in the current project
 ./build.sh                                   # builds dist/genius_dev-<version>-py3-none-any.whl and smoke-tests it in a clean venv
 pipx install dist/genius_dev-*.whl           # or: uv tool install dist/genius_dev-*.whl
 playwright install chromium                  # only for browser testing / visual QA (pip install 'genius-dev[browser]')
+genius browser-install                       # same, for the standalone/brew binary
 genius --install-completion                  # zsh/bash/fish completion
 ./dev.sh                                     # development: venv + editable install (+ dev, browser extras) then launches genius
 ```
