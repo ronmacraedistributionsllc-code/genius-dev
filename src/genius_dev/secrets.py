@@ -48,7 +48,7 @@ DEFAULT_EXCLUDED_DIRS = [
 ]
 
 
-_FAKE_MARKERS = ("abcdefghijklmnop", "0123456789", "hunter2", "secret", "fake", "dummy", "example", "test", "xxxx", "1234567890", "redacted", "placeholder", "changeme", "your-", "your_")
+_FAKE_MARKERS = ("abcdefghijklmnop", "0123456789", "hunter2", "secret", "fake", "dummy", "example", "test", "xxxx", "1234567890", "redacted", "placeholder", "changeme", "your-", "your_")  # genius:ignore
 
 
 def looks_fake(token: str) -> bool:
