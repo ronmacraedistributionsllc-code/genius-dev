@@ -36,6 +36,12 @@ SECRET_FILE_GLOBS = [
     "credentials*", "*.keystore", ".npmrc", ".pypirc", "secrets.*", "*.secret", ".netrc",
 ]
 
+# A file whose extension marks it as source code is never a "secret file" by name, even if it happens to be called
+# secrets.py / credentials.js / etc. (an ordinary module implementing secret-handling logic, not a literal credential
+# dump). Bug found by running Genius Dev's own `finish` audit on itself: it flagged src/genius_dev/secrets.py.
+_CODE_EXTS = {"py", "pyi", "js", "jsx", "ts", "tsx", "mjs", "cjs", "go", "rs", "rb", "java", "kt", "kts", "swift",
+              "c", "h", "hpp", "cc", "cpp", "cs", "php", "sh", "bash", "zsh", "pl", "lua", "dart", "scala", "m", "mm"}
+
 DEFAULT_EXCLUDED_DIRS = [
     ".git", "node_modules", ".venv", "venv", "__pycache__", "dist", "build", ".next",
     "target", ".genius", ".pytest_cache", ".mypy_cache", ".gradle", "Pods", ".idea",
@@ -73,6 +79,9 @@ def redact(text: str) -> str:
 
 def is_secret_file(path: str) -> bool:
     name = os.path.basename(path)
+    ext = name.rsplit(".", 1)[-1].lower() if "." in name else ""
+    if ext in _CODE_EXTS:
+        return False
     return any(fnmatch.fnmatch(name, g) for g in SECRET_FILE_GLOBS)
 
 

@@ -46,8 +46,31 @@ async def test_scenarios_cover_planning_requirements_checkpoint_resume_cost(tmp_
 
 
 def test_scenario_selection_is_deterministic_and_generic_fallback_is_honest():
-    assert scenario_for("FILES calculator.py").name == "fix" and scenario_for("slug.py in tree").name == "debug"
+    assert scenario_for("## FILES\ncalculator.py\ntests/test_calculator.py").name == "fix"
+    assert scenario_for("## FILES\nslug.py\ntests/test_slug.py").name == "debug"
     assert scenario_for("GOAL: Build a landing page for X").name == "web" and scenario_for("GOAL: something unrelated") is None
+
+
+def test_scenario_selection_is_not_fooled_by_a_nested_file_of_the_same_name():
+    """Regression: Genius Dev's own repo bundles demo_project/calculator.py and demo_debug/slug.py as source. Running
+    the mock model on a REAL goal against Genius Dev's own repo must never misfire into a canned demo script just
+    because a same-named file exists somewhere nested in the project (found by running `genius finish` on this repo)."""
+    context = "## FILES\nsrc/genius_dev/demo_project/calculator.py\nsrc/genius_dev/demo_debug/slug.py\nsrc/genius_dev/secrets.py"
+    assert scenario_for(f"{context}\n\nGOAL: Resolve these audit findings without breaking existing behaviour") is None
+    assert scenario_for("calculator.pyc") is None and scenario_for("my_calculator.py") is None
+    assert scenario_for("not_slug.py") is None and scenario_for("slug.py2") is None
+    # demo_web/README.md's own title ("Acme marketing site") and body ("the landing page") are bundled in this repo;
+    # they must not leak a match when they appear as file *content* ahead of an unrelated goal.
+    readme_body = "# Acme marketing site\n\nEmpty on purpose: the web demo asks Genius Dev to build the landing page."
+    assert scenario_for(f"## FILE src/genius_dev/demo_web/README.md\n{readme_body}\n\nGOAL: fix a bug") is None
+
+
+def test_secret_file_glob_excludes_source_code_named_secrets_or_credentials():
+    """Regression: `genius finish`'s own security scan flagged src/genius_dev/secrets.py as a tracked secret file."""
+    from genius_dev.secrets import is_secret_file
+    assert not is_secret_file("src/genius_dev/secrets.py") and not is_secret_file("app/credentials.py")
+    assert not is_secret_file("credentials.js") and not is_secret_file("secrets.go")
+    assert is_secret_file(".env") and is_secret_file("secrets.yaml") and is_secret_file("credentials.json") and is_secret_file("id_rsa")
 
 
 async def test_web_scenario_browser_audit_fails_then_repairs(tmp_path, make_rt):

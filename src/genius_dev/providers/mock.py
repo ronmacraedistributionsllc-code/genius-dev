@@ -123,7 +123,10 @@ class CalculatorFix(Scenario):
     name = "fix"
 
     def matches(self, first):
-        return "calculator.py" in first
+        # Match only a *project file* named exactly calculator.py at the project root (a whole line in the FILES
+        # section), never a substring anywhere in the context — otherwise a project that merely contains a nested
+        # file of that name (e.g. Genius Dev's own bundled demo_project/calculator.py) would spuriously match.
+        return bool(re.search(r"(?m)^calculator\.py$", first))
 
     def plan(self, first):
         u = "cmd:{py} -m unittest -q tests.test_calculator.TestCalculator."
@@ -150,7 +153,7 @@ class SlugDebug(Scenario):
     name = "debug"
 
     def matches(self, first):
-        return "slug.py" in first
+        return bool(re.search(r"(?m)^slug\.py$", first))
 
     def plan(self, first):
         t = "cmd:{py} -m unittest -q tests.test_slug.TestSlug."
@@ -202,7 +205,11 @@ class WebLanding(Scenario):
     name = "web"
 
     def matches(self, first):
-        return "landing page" in first.split("GOAL:")[-1].lower() or "acme marketing site" in first.lower()
+        # Goal-scoped only (see CalculatorFix/SlugDebug note above): this used to also check "acme marketing site"
+        # against the *whole* context, but that phrase is the literal title of demo_web/README.md, which Genius Dev
+        # ships inside its own repo — so running the mock on a real goal here could misfire into this scripted
+        # scenario too. The goal-text check alone already covers `genius demo --scenario web`'s actual goal wording.
+        return "landing page" in first.split("GOAL:")[-1].lower()
 
     def plan(self, first):
         chk = "cmd:{py} -c \"import pathlib,sys; t=pathlib.Path('index.html').read_text(); sys.exit(0 if 'Get started' in t and '<h1' in t else 1)\""
